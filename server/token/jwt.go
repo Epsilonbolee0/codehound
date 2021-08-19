@@ -10,7 +10,7 @@ import (
 
 var JwtAuthenithication = func(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		notAuth := []string{"/api/register", "/api/login"}
+		notAuth := []string{"/auth/register", "/auth/login"}
 		requestPath := r.URL.Path
 		for _, value := range notAuth {
 			if value == requestPath {
@@ -63,6 +63,9 @@ var JwtAuthenithication = func(next http.Handler) http.Handler {
 			Name:    "token",
 			Value:   tokenStr,
 			Expires: expTime,
+			Path:    "/",
+
+			HttpOnly: true,
 		})
 
 		next.ServeHTTP(w, r)

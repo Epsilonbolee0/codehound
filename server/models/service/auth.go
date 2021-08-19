@@ -30,7 +30,7 @@ func (auth *AuthService) Login(login, password string) map[string]interface{} {
 	case gorm.ErrRecordNotFound:
 		return utils.Message(http.StatusNotFound, "Account not found!")
 	default:
-		return utils.Message(http.StatusServiceUnavailable, "Connection error.")
+		return utils.Message(http.StatusInternalServerError, "Error occured while creating account!")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(password))

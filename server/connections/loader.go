@@ -2,12 +2,15 @@ package connections
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 
 	"../models/domain"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var conn *gorm.DB
@@ -31,19 +34,26 @@ func GetConnection(role string) *gorm.DB {
 	username := os.Getenv("db_login_" + role)
 	password := os.Getenv("db_password_" + role)
 
-	fmt.Println(role)
-	fmt.Println(username)
-
 	dbURI := fmt.Sprintf("host=%s dbname=%s user=%s password=%s sslmode=disable", dbHost, dbName, username, password)
 	if err != nil {
 		panic(err)
 	}
 
-	conn, err = gorm.Open(postgres.Open(dbURI), &gorm.Config{})
+	customLogger := logger.New(
+		log.New(ioutil.Discard, "\r\n", log.LstdFlags),
+		logger.Config{},
+	)
+
+	conn, err = gorm.Open(postgres.Open(dbURI), &gorm.Config{Logger: customLogger})
 	if err != nil {
 		panic(err)
 	}
 
-	conn.Debug().AutoMigrate(&domain.Account{})
+	conn.Debug().AutoMigrate(
+		&domain.Account{},
+		&domain.Version{},
+		&domain.Library{},
+		&domain.Language{},
+	)
 	return conn
 }

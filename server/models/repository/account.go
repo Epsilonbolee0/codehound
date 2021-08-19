@@ -34,7 +34,3 @@ func (repo *AccountRepository) FindByEmail(email string) (domain.Account, error)
 func (repo *AccountRepository) Create(account domain.Account) error {
 	return repo.Conn.Create(&account).Error
 }
-
-func (repo *AccountRepository) Delete(login string) error {
-	return repo.Conn.Delete(&login).Error
-}

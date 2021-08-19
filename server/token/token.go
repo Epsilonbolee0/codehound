@@ -13,13 +13,14 @@ type Claims struct {
 }
 
 func NewClaims(login string) (*Claims, time.Time) {
-	expirationTime := time.Now().Add(10 * time.Second)
+	expirationTime := time.Now().Add(30 * time.Minute)
 	return &Claims{
-		Login: login,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+			Login: login,
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: expirationTime.Unix(),
+			},
 		},
-	}, expirationTime
+		expirationTime
 }
 
 func (tk *Claims) String() string {

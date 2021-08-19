@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
@@ -22,9 +23,10 @@ type AuthController struct {
 
 func SetupAuthController(authService *service.AuthService, router *mux.Router) {
 	controller := &AuthController{authService: authService}
-	router.HandleFunc("/api/login", controller.Login).Methods("POST")
-	router.HandleFunc("/api/register", controller.Register).Methods("POST")
-	router.HandleFunc("/api/home", controller.Home).Methods("GET")
+	router.HandleFunc("/auth/login", controller.Login).Methods("POST")
+	router.HandleFunc("/auth/logout", controller.Logout).Methods("POST")
+	router.HandleFunc("/auth/register", controller.Register).Methods("POST")
+	router.HandleFunc("/auth/home", controller.Home).Methods("GET")
 }
 
 func (controller *AuthController) Login(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +43,27 @@ func (controller *AuthController) Login(w http.ResponseWriter, r *http.Request) 
 			Name:    "token",
 			Value:   token,
 			Expires: expTime,
+			Path:    "/",
+
+			HttpOnly: true,
 		})
 
 		utils.Respond(w, resp)
 	}
+}
+
+func (controller *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    "token",
+		Value:   "",
+		Expires: time.Unix(0, 0),
+		Path:    "/",
+
+		HttpOnly: true,
+	})
+
+	resp := utils.Message(http.StatusOK, "Logout was successful")
+	utils.Respond(w, resp)
 }
 
 func (controller *AuthController) Register(w http.ResponseWriter, r *http.Request) {

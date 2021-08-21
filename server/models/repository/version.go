@@ -53,6 +53,11 @@ func (repo *VersionRepository) DeleteLibrary(name string, library domain.Library
 	return nil
 }
 
+func (repo *VersionRepository) ClearLibraries(name string) error {
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Libraries").Clear()
+	return nil
+}
+
 func (repo *VersionRepository) Delete(name string) error {
 	return repo.Conn.Where("name = ?", name).Delete(domain.Version{}).Error
 }

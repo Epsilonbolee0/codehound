@@ -25,6 +25,12 @@ func SetupVersioningController(versioningService *service.VersioningService, rou
 	router.HandleFunc("/versioning/list_libraries", controller.ListLibraries).Methods("GET")
 	router.HandleFunc("/versioning/add_library", controller.AddLibrary).Methods("PATCH")
 	router.HandleFunc("/versioning/delete_library", controller.DeleteLibrary).Methods("DELETE")
+
+	router.HandleFunc("/versioning/tree/bfs", controller.ListTreeBFS).Methods("GET")
+	router.HandleFunc("/versioning/tree/parent", controller.FindParent).Methods("GET")
+	router.HandleFunc("/versioning/tree/children", controller.ListChildren).Methods("GET")
+	router.HandleFunc("/versioning/tree/add", controller.AddChildVersion).Methods("POST")
+
 }
 
 func (controller *VersioningController) ListByAuthor(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +56,62 @@ func (controller *VersioningController) AddVersion(w http.ResponseWriter, r *htt
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
 		resp = controller.versioningService.AddVersion(dto.Title, dto.Code, dto.Login, dto.LanguageName, dto.LanguageVersion)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *VersioningController) AddChildVersion(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.VersionDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.versioningService.AddChildVersion(dto.Login, dto.Name, dto.Link)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *VersioningController) FindParent(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.VersionDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.versioningService.FindParent(dto.Name)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *VersioningController) ListChildren(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.VersionDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.versioningService.ListChildren(dto.Name)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *VersioningController) ListTreeBFS(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.VersionDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.versioningService.ListTreeBFS(dto.Name)
 	}
 
 	utils.Respond(w, resp)

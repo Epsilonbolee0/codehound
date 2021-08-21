@@ -18,10 +18,16 @@ type VersioningService struct {
 	versionRepo  *repository.VersionRepository
 	languageRepo *repository.LanguageRepository
 	libraryRepo  *repository.LibraryRepository
+	treeRepo     *repository.TreeRepository
 }
 
-func NewVersioningService(accountRepo *repository.AccountRepository, versionRepo *repository.VersionRepository, languageRepo *repository.LanguageRepository, libraryRepo *repository.LibraryRepository) *VersioningService {
-	return &VersioningService{accountRepo, versionRepo, languageRepo, libraryRepo}
+func NewVersioningService(
+	accountRepo *repository.AccountRepository,
+	versionRepo *repository.VersionRepository,
+	languageRepo *repository.LanguageRepository,
+	libraryRepo *repository.LibraryRepository,
+	treeRepo *repository.TreeRepository) *VersioningService {
+	return &VersioningService{accountRepo, versionRepo, languageRepo, libraryRepo, treeRepo}
 }
 
 func (versioning *VersioningService) ListByAuthor(login string) map[string]interface{} {
@@ -71,11 +77,11 @@ func (versioning *VersioningService) AddVersion(title, code, login, langName, la
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions")
 	}
 
-	builder := factory.NewVersionBuilder()
+	versionBuilder := factory.NewVersionBuilder()
 	hash := versioning.generateName(author.Login)
 	now := time.Now()
 
-	version := builder.
+	version := versionBuilder.
 		Date(now).
 		Name(hash).
 		Code(code).
@@ -85,7 +91,16 @@ func (versioning *VersioningService) AddVersion(title, code, login, langName, la
 		Build()
 
 	err = versioning.versionRepo.Create(version)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions!")
+	}
 
+	treeBuilder := factory.NewTreeBuilder()
+	tree := treeBuilder.
+		Name(hash).
+		Build()
+
+	err = versioning.treeRepo.Create(tree)
 	if err != nil {
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions!")
 	}
@@ -93,11 +108,98 @@ func (versioning *VersioningService) AddVersion(title, code, login, langName, la
 	return utils.Message(http.StatusOK, "Version added!")
 }
 
+func (versioning *VersioningService) AddChildVersion(login, nameOfOrigin, link string) map[string]interface{} {
+	author, err := versioning.accountRepo.FindByLogin(login)
+	switch err {
+	case nil:
+		break
+	case gorm.ErrRecordNotFound:
+		return utils.Message(http.StatusNotFound, "Version not found")
+	default:
+		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions")
+	}
+
+	version, err := versioning.versionRepo.Find(nameOfOrigin)
+	switch err {
+	case nil:
+		break
+	case gorm.ErrRecordNotFound:
+		return utils.Message(http.StatusNotFound, "Version not found")
+	default:
+		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions")
+	}
+
+	versionBuilder := factory.NewVersionBuilder()
+	hash := versioning.generateName(author.Login)
+	now := time.Now()
+
+	newVersion := versionBuilder.
+		Date(now).
+		Name(hash).
+		Code(version.Code).
+		Title(version.Title).
+		Author(author.ID).
+		Language(version.LanguageID).
+		Build()
+
+	err = versioning.versionRepo.Create(newVersion)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions!")
+	}
+
+	treeBuilder := factory.NewTreeBuilder()
+	tree := treeBuilder.
+		Name(hash).
+		ParentName(version.Name).
+		Link(link).
+		Build()
+
+	err = versioning.treeRepo.Create(tree)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions!")
+	}
+
+	return utils.Message(http.StatusOK, "Version added!")
+}
+
+func (versioning *VersioningService) FindParent(version string) map[string]interface{} {
+	parent, err := versioning.treeRepo.FindParent(version)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while finding parents(!")
+	}
+
+	response := utils.Message(http.StatusOK, "Parent found!")
+	response["parent"] = parent
+	return response
+}
+
+func (versioning *VersioningService) ListChildren(version string) map[string]interface{} {
+	children, err := versioning.treeRepo.ListChildren(version)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while listing children!")
+	}
+
+	response := utils.Message(http.StatusOK, "Children found!")
+	response["children"] = children
+	return response
+}
+
+func (versioning *VersioningService) ListTreeBFS(version string) map[string]interface{} {
+	tree, err := versioning.treeRepo.ListTreeBFS(version)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while listing tree!")
+	}
+
+	response := utils.Message(http.StatusOK, "Tree listed!")
+	response["tree"] = tree
+	return response
+}
+
 func (versioning *VersioningService) generateName(login string) string {
 	stringToHash := login + strconv.FormatInt(time.Now().Unix(), 10)
 	algorithm := sha1.New()
 	algorithm.Write(([]byte(stringToHash)))
-	return hex.EncodeToString(algorithm.Sum(nil))[0:6]
+	return hex.EncodeToString(algorithm.Sum(nil))[:6]
 }
 
 func (versioning *VersioningService) UpdateCode(name, code string) map[string]interface{} {
@@ -173,7 +275,12 @@ func (versioning *VersioningService) DeleteLibrary(name, libName, libVersion str
 }
 
 func (versioning *VersioningService) Delete(name string) map[string]interface{} {
-	err := versioning.versionRepo.Delete(name)
+	err := versioning.versionRepo.ClearLibraries(name)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Error occured while deleting versions!")
+	}
+
+	err = versioning.versionRepo.Delete(name)
 	if err != nil {
 		return utils.Message(http.StatusInternalServerError, "Error occured while deleting versions!")
 	}

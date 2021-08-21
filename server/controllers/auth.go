@@ -30,13 +30,14 @@ func SetupAuthController(authService *service.AuthService, router *mux.Router) {
 }
 
 func (controller *AuthController) Login(w http.ResponseWriter, r *http.Request) {
-	account := &domain.Account{}
-	err := json.NewDecoder(r.Body).Decode(account)
+	dto := &domain.AccountDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
 	if err != nil {
 		utils.Respond(w, utils.Message(http.StatusBadRequest, "Invalid request"))
 	} else {
-		resp := controller.authService.Login(account.Login, account.Password)
-		claims, expTime := token.NewClaims(account.Login)
+		resp := controller.authService.Login(dto.Login, dto.Password)
+		claims, expTime := token.NewClaims(dto.Login)
 		token := claims.String()
 
 		http.SetCookie(w, &http.Cookie{
@@ -67,12 +68,13 @@ func (controller *AuthController) Logout(w http.ResponseWriter, r *http.Request)
 }
 
 func (controller *AuthController) Register(w http.ResponseWriter, r *http.Request) {
-	account := &domain.Account{}
-	err := json.NewDecoder(r.Body).Decode(account)
+	dto := &domain.AccountDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
 	if err != nil {
 		utils.Respond(w, utils.Message(http.StatusBadRequest, "Invalid request"))
 	} else {
-		resp := controller.authService.Register(account.Login, account.Email, account.Password)
+		resp := controller.authService.Register(dto.Login, dto.Email, dto.Password)
 		utils.Respond(w, resp)
 	}
 }

@@ -8,3 +8,8 @@ type Language struct {
 	Libraries []Library `json:"libraries" gorm:"foreignKey:LanguageID"`
 	Versions  []Version `json:"versions" gorm:"foreignKey:LanguageID"`
 }
+
+type LanguageDTO struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}

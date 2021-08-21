@@ -58,5 +58,7 @@ func (repo *VersionRepository) Delete(name string) error {
 }
 
 func (repo *VersionRepository) LibraryIsValid(name string, library domain.Library) bool {
-	return repo.Conn.Model(&domain.Version{Name: name, LanguageID: library.LanguageID}).Association("Libraries").Count() == 1
+	var version domain.Version
+	err := repo.Conn.Where("name = ? AND language_id = ?", name, library.LanguageID).First(&version).Error
+	return err == nil && version.Name != ""
 }

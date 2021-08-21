@@ -30,14 +30,14 @@ func SetupToolsController(toolsService *service.ToolsService, router *mux.Router
 
 func (controller *ToolsController) AddLanguage(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
-	language := &domain.Language{}
+	dto := &domain.LanguageDTO{}
 
-	err := json.NewDecoder(r.Body).Decode(language)
+	err := json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.toolsService.AddLanguage(language.Name, language.Version)
+		resp = controller.toolsService.AddLanguage(dto.Name, dto.Version)
 	}
 
 	utils.Respond(w, resp)
@@ -49,13 +49,13 @@ func (controller *ToolsController) ListLanguages(w http.ResponseWriter, r *http.
 
 func (controller *ToolsController) ListLanguageVersions(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
-	language := &domain.Language{}
-	err := json.NewDecoder(r.Body).Decode(language)
+	dto := &domain.LanguageDTO{}
+	err := json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.toolsService.ListLanguageVersions(language.Name)
+		resp = controller.toolsService.ListLanguageVersions(dto.Name)
 	}
 
 	utils.Respond(w, resp)
@@ -63,13 +63,13 @@ func (controller *ToolsController) ListLanguageVersions(w http.ResponseWriter, r
 
 func (controller *ToolsController) DeleteLanguageVersion(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
-	language := &domain.Language{}
-	err := json.NewDecoder(r.Body).Decode(language)
+	dto := &domain.LanguageDTO{}
+	err := json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.toolsService.DeleteLanguageVersion(language.Name, language.Version)
+		resp = controller.toolsService.DeleteLanguageVersion(dto.Name, dto.Version)
 	}
 
 	utils.Respond(w, resp)
@@ -77,13 +77,13 @@ func (controller *ToolsController) DeleteLanguageVersion(w http.ResponseWriter, 
 
 func (controller *ToolsController) AddLibrary(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
-	library := &domain.LibraryDTO{}
-	err := json.NewDecoder(r.Body).Decode(library)
+	dto := &domain.LibraryDTO{}
+	err := json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.toolsService.AddLibrary(library.Name, library.Version, library.LanguageName, library.LanguageVersion)
+		resp = controller.toolsService.AddLibrary(dto.Name, dto.Version, dto.LanguageName, dto.LanguageVersion)
 	}
 
 	utils.Respond(w, resp)
@@ -91,13 +91,13 @@ func (controller *ToolsController) AddLibrary(w http.ResponseWriter, r *http.Req
 
 func (controller *ToolsController) ListLibraries(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
-	library := &domain.Library{}
-	err := json.NewDecoder(r.Body).Decode(library)
+	dto := &domain.LibraryDTO{}
+	err := json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.toolsService.ListLibraries(library.Name, library.Version)
+		resp = controller.toolsService.ListLibraries(dto.Name, dto.Version)
 	}
 
 	utils.Respond(w, resp)
@@ -105,13 +105,13 @@ func (controller *ToolsController) ListLibraries(w http.ResponseWriter, r *http.
 
 func (controller *ToolsController) ListLibraryVersions(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
-	library := &domain.Library{}
-	err := json.NewDecoder(r.Body).Decode(library)
+	dto := &domain.LibraryDTO{}
+	err := json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.toolsService.ListLibraryVersions(library.Name)
+		resp = controller.toolsService.ListLibraryVersions(dto.Name)
 	}
 
 	utils.Respond(w, resp)
@@ -119,13 +119,13 @@ func (controller *ToolsController) ListLibraryVersions(w http.ResponseWriter, r 
 
 func (controller *ToolsController) DeleteLibraryVersion(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
-	library := &domain.Library{}
-	err := json.NewDecoder(r.Body).Decode(library)
+	dto := &domain.LibraryDTO{}
+	err := json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.toolsService.DeleteLibraryVersion(library.Name, library.Version)
+		resp = controller.toolsService.DeleteLibraryVersion(dto.Name, dto.Version)
 	}
 
 	utils.Respond(w, resp)

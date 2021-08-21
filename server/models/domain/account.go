@@ -9,3 +9,9 @@ type Account struct {
 
 	Versions []Version `json:"versions" gorm:"foreignKey:Author"`
 }
+
+type AccountDTO struct {
+	Login    string `json:"login"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

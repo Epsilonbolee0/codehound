@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
@@ -24,8 +25,9 @@ func Run() {
 
 	host := os.Getenv("server_host")
 	port := os.Getenv("server_port")
+	now := time.Now()
 
-	fmt.Printf("Listening to %s:%s\n", host, port)
+	fmt.Printf("[%s] Listening to %s:%s\n", now.Format("15:04:05"), host, port)
 
 	err := http.ListenAndServe(":"+port, router)
 	if err != nil {
@@ -49,6 +51,8 @@ func setupToolsController(conn *gorm.DB, router *mux.Router) {
 func setupVersioningController(conn *gorm.DB, router *mux.Router) {
 	accountRepo := repository.NewAccountRepository(conn)
 	versionRepo := repository.NewVersionRepository(conn)
-	versioningService := service.NewVersioningService(accountRepo, versionRepo)
+	libraryRepo := repository.NewLibraryRepository(conn)
+	languageRepo := repository.NewLanguageRepository(conn)
+	versioningService := service.NewVersioningService(accountRepo, versionRepo, languageRepo, libraryRepo)
 	controllers.SetupVersioningController(versioningService, router)
 }

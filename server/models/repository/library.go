@@ -13,6 +13,12 @@ func NewLibraryRepository(conn *gorm.DB) *LibraryRepository {
 	return &LibraryRepository{Conn: conn}
 }
 
+func (repo *LibraryRepository) Find(name, version string) (domain.Library, error) {
+	var library domain.Library
+	err := repo.Conn.Where("name = ? AND version = ?", name, version).First(&library).Error
+	return library, err
+}
+
 func (repo *LibraryRepository) FindByLanguage(name, version string) ([]string, error) {
 	var libraries []string
 

@@ -58,3 +58,10 @@ func (b *VersionBuilder) Author(author uint) *VersionBuilder {
 	})
 	return b
 }
+
+func (b *VersionBuilder) Language(language uint) *VersionBuilder {
+	b.actions = append(b.actions, func(version *domain.Version) {
+		version.LanguageID = language
+	})
+	return b
+}

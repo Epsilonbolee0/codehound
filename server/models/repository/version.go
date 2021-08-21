@@ -37,6 +37,26 @@ func (repo *VersionRepository) UpdateTitle(name, title string) error {
 	return repo.Conn.Model(&domain.Version{}).Where("name = ?", name).Update("title", title).Error
 }
 
+func (repo *VersionRepository) ListLibraries(name string) ([]domain.Library, error) {
+	var libraries []domain.Library
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Libraries").Find(&libraries)
+	return libraries, nil
+}
+
+func (repo *VersionRepository) AddLibrary(name string, library domain.Library) error {
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Libraries").Append(&library)
+	return nil
+}
+
+func (repo *VersionRepository) DeleteLibrary(name string, library domain.Library) error {
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Libraries").Delete(&library)
+	return nil
+}
+
 func (repo *VersionRepository) Delete(name string) error {
 	return repo.Conn.Where("name = ?", name).Delete(domain.Version{}).Error
+}
+
+func (repo *VersionRepository) LibraryIsValid(name string, library domain.Library) bool {
+	return repo.Conn.Model(&domain.Version{Name: name, LanguageID: library.LanguageID}).Association("Libraries").Count() == 1
 }

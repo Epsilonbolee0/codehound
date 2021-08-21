@@ -5,7 +5,8 @@ type Library struct {
 	Name    string `json:"name" gorm:"index:lib_name_and_version,unique"`
 	Version string `json:"version" gorm:"index:lib_name_and_version,unique"`
 
-	LanguageID uint `json:"language_id"`
+	LanguageID uint      `json:"language_id"`
+	Versions   []Version `json:"versions" gorm:"many2many:version_libraries"`
 }
 
 type LibraryDTO struct {

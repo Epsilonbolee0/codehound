@@ -44,7 +44,7 @@ func GetConnection(role string) *gorm.DB {
 		logger.Config{},
 	)
 
-	conn, err = gorm.Open(postgres.Open(dbURI), &gorm.Config{Logger: customLogger})
+	conn, err = gorm.Open(postgres.Open(dbURI), &gorm.Config{Logger: customLogger, FullSaveAssociations: true})
 	if err != nil {
 		panic(err)
 	}

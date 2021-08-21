@@ -36,8 +36,6 @@ func (tools *ToolsService) AddLanguage(name, version string) map[string]interfac
 }
 
 func (tools *ToolsService) AddLibrary(name, version, langName, langVersion string) map[string]interface{} {
-	builder := factory.NewLibraryBuilder()
-
 	language, err := tools.languageRepo.FindByNameAndVersion(langName, langVersion)
 	switch err {
 	case nil:
@@ -48,6 +46,7 @@ func (tools *ToolsService) AddLibrary(name, version, langName, langVersion strin
 		return utils.Message(http.StatusInternalServerError, "Error occured while creating library!")
 	}
 
+	builder := factory.NewLibraryBuilder()
 	library := builder.
 		Name(name).
 		Version(version).

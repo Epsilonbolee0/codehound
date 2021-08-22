@@ -33,10 +33,6 @@ func (repo *VersionRepository) UpdateCode(name, code string) error {
 	return repo.Conn.Model(&domain.Version{}).Where("name = ?", name).Update("code", code).Error
 }
 
-func (repo *VersionRepository) UpdateTitle(name, title string) error {
-	return repo.Conn.Model(&domain.Version{}).Where("name = ?", name).Update("title", title).Error
-}
-
 func (repo *VersionRepository) ListLibraries(name string) ([]domain.Library, error) {
 	var libraries []domain.Library
 	repo.Conn.Model(&domain.Version{Name: name}).Association("Libraries").Find(&libraries)
@@ -63,7 +59,9 @@ func (repo *VersionRepository) Delete(name string) error {
 }
 
 func (repo *VersionRepository) LibraryIsValid(name string, library domain.Library) bool {
-	var version domain.Version
-	err := repo.Conn.Where("name = ? AND language_id = ?", name, library.LanguageID).First(&version).Error
-	return err == nil && version.Name != ""
+	var impl domain.Implementation
+
+	subQuery := repo.Conn.Model(&domain.Version{}).Where("name = ?", name).Select("implementation")
+	err := repo.Conn.Where("name = (?) AND language_id = ?", subQuery, library.LanguageID).First(&impl).Error
+	return err == nil && impl.Name != ""
 }

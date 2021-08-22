@@ -5,8 +5,8 @@ type Language struct {
 	Name    string `json:"name" gorm:"index:lang_name_and_version,unique"`
 	Version string `json:"version" gorm:"index:lang_name_and_version,unique"`
 
-	Libraries []Library `json:"libraries" gorm:"foreignKey:LanguageID"`
-	Versions  []Version `json:"versions" gorm:"foreignKey:LanguageID"`
+	Libraries       []Library        `json:"libraries" gorm:"foreignKey:LanguageID"`
+	Implementations []Implementation `json:"implementations" gorm:"foreignKey:LanguageID"`
 }
 
 type LanguageDTO struct {

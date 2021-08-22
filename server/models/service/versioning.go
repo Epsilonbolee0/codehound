@@ -14,20 +14,20 @@ import (
 )
 
 type VersioningService struct {
-	accountRepo  *repository.AccountRepository
-	versionRepo  *repository.VersionRepository
-	languageRepo *repository.LanguageRepository
-	libraryRepo  *repository.LibraryRepository
-	treeRepo     *repository.TreeRepository
+	accountRepo *repository.AccountRepository
+	versionRepo *repository.VersionRepository
+	implRepo    *repository.ImplementationRepository
+	libraryRepo *repository.LibraryRepository
+	treeRepo    *repository.TreeRepository
 }
 
 func NewVersioningService(
 	accountRepo *repository.AccountRepository,
 	versionRepo *repository.VersionRepository,
-	languageRepo *repository.LanguageRepository,
+	implRepo *repository.ImplementationRepository,
 	libraryRepo *repository.LibraryRepository,
 	treeRepo *repository.TreeRepository) *VersioningService {
-	return &VersioningService{accountRepo, versionRepo, languageRepo, libraryRepo, treeRepo}
+	return &VersioningService{accountRepo, versionRepo, implRepo, libraryRepo, treeRepo}
 }
 
 func (versioning *VersioningService) ListByAuthor(login string) map[string]interface{} {
@@ -56,7 +56,7 @@ func (versioning *VersioningService) ListByAuthor(login string) map[string]inter
 	return response
 }
 
-func (versioning *VersioningService) AddVersion(title, code, login, langName, langVersion string) map[string]interface{} {
+func (versioning *VersioningService) AddVersion(code, login, implName string) map[string]interface{} {
 	author, err := versioning.accountRepo.FindByLogin(login)
 	switch err {
 	case nil:
@@ -67,12 +67,12 @@ func (versioning *VersioningService) AddVersion(title, code, login, langName, la
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions")
 	}
 
-	language, err := versioning.languageRepo.FindByNameAndVersion(langName, langVersion)
+	_, err = versioning.implRepo.Find(implName)
 	switch err {
 	case nil:
 		break
 	case gorm.ErrRecordNotFound:
-		return utils.Message(http.StatusNotFound, "Version not found")
+		return utils.Message(http.StatusNotFound, "Implementation not found")
 	default:
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions")
 	}
@@ -85,9 +85,8 @@ func (versioning *VersioningService) AddVersion(title, code, login, langName, la
 		Date(now).
 		Name(hash).
 		Code(code).
-		Title(title).
 		Author(author.ID).
-		Language(language.ID).
+		Implementation(implName).
 		Build()
 
 	err = versioning.versionRepo.Create(version)
@@ -137,9 +136,8 @@ func (versioning *VersioningService) AddChildVersion(login, nameOfOrigin, link s
 		Date(now).
 		Name(hash).
 		Code(version.Code).
-		Title(version.Title).
 		Author(author.ID).
-		Language(version.LanguageID).
+		Implementation(version.Implementation).
 		Build()
 
 	err = versioning.versionRepo.Create(newVersion)
@@ -209,15 +207,6 @@ func (versioning *VersioningService) UpdateCode(name, code string) map[string]in
 	}
 
 	return utils.Message(http.StatusOK, "Version code successfully updated!")
-}
-
-func (versioning *VersioningService) UpdateTitle(name, title string) map[string]interface{} {
-	err := versioning.versionRepo.UpdateTitle(name, title)
-	if err != nil {
-		return utils.Message(http.StatusInternalServerError, "Error occured while updating version's title!")
-	}
-
-	return utils.Message(http.StatusOK, "Version title successfully updated!")
 }
 
 func (versioning *VersioningService) ListLibraries(name string) map[string]interface{} {

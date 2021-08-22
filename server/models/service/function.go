@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"../../utils"
-	"../factory"
+	"../builder"
 	"../repository"
 	"gorm.io/gorm"
 )
@@ -42,7 +42,12 @@ func (function *FunctionService) Find(name string) map[string]interface{} {
 
 func (function *FunctionService) FindRoot(name string) map[string]interface{} {
 	root, err := function.implementationRepo.FindRoot(name)
-	if err != nil {
+	switch err {
+	case nil:
+		break
+	case gorm.ErrRecordNotFound:
+		return utils.Message(http.StatusNotFound, "Root is not found!")
+	default:
 		return utils.Message(http.StatusInternalServerError, "Failure occured while finding root!")
 	}
 
@@ -62,8 +67,8 @@ func (function *FunctionService) Create(name, langName, langVersion string) map[
 		return utils.Message(http.StatusInternalServerError, "Error occured while creating implementation!")
 	}
 
-	builder := factory.NewImplementationBuilder()
-	implementation := builder.
+	implBuilder := builder.NewImplementationBuilder()
+	implementation := implBuilder.
 		Name(name).
 		Language(language.ID).
 		Build()

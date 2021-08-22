@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"../../utils"
-	"../factory"
+	"../builder"
 	"../repository"
 	"gorm.io/gorm"
 )
@@ -19,8 +19,8 @@ func NewToolsService(languageRepo *repository.LanguageRepository, libraryRepo *r
 }
 
 func (tools *ToolsService) AddLanguage(name, version string) map[string]interface{} {
-	builder := factory.NewLanguageBuilder()
-	language := builder.
+	languageBuilder := builder.NewLanguageBuilder()
+	language := languageBuilder.
 		Name(name).
 		Version(version).
 		Build()
@@ -46,8 +46,8 @@ func (tools *ToolsService) AddLibrary(name, version, langName, langVersion strin
 		return utils.Message(http.StatusInternalServerError, "Error occured while creating library!")
 	}
 
-	builder := factory.NewLibraryBuilder()
-	library := builder.
+	libBuilder := builder.NewLibraryBuilder()
+	library := libBuilder.
 		Name(name).
 		Version(version).
 		Language(language.ID).

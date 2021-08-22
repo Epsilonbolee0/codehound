@@ -28,6 +28,9 @@ func (repo *ImplementationRepository) Find(name string) (domain.Implementation, 
 func (repo *ImplementationRepository) FindRoot(name string) (domain.Version, error) {
 	var versions []domain.Version
 	repo.Conn.Model(&domain.Implementation{Name: name}).Order("date ASC").Association("Versions").Find(&versions)
+	if len(versions) == 0 {
+		return domain.Version{}, gorm.ErrRecordNotFound
+	}
 	return versions[0], nil
 }
 

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"../../utils"
-	"../factory"
+	"../builder"
 	"../repository"
 	"gorm.io/gorm"
 )
@@ -77,7 +77,7 @@ func (versioning *VersioningService) AddVersion(code, login, implName string) ma
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions")
 	}
 
-	versionBuilder := factory.NewVersionBuilder()
+	versionBuilder := builder.NewVersionBuilder()
 	hash := versioning.generateName(author.Login)
 	now := time.Now()
 
@@ -94,7 +94,7 @@ func (versioning *VersioningService) AddVersion(code, login, implName string) ma
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions!")
 	}
 
-	treeBuilder := factory.NewTreeBuilder()
+	treeBuilder := builder.NewTreeBuilder()
 	tree := treeBuilder.
 		Name(hash).
 		Build()
@@ -128,7 +128,7 @@ func (versioning *VersioningService) AddChildVersion(login, nameOfOrigin, link s
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions")
 	}
 
-	versionBuilder := factory.NewVersionBuilder()
+	versionBuilder := builder.NewVersionBuilder()
 	hash := versioning.generateName(author.Login)
 	now := time.Now()
 
@@ -145,7 +145,7 @@ func (versioning *VersioningService) AddChildVersion(login, nameOfOrigin, link s
 		return utils.Message(http.StatusInternalServerError, "Error occured while adding versions!")
 	}
 
-	treeBuilder := factory.NewTreeBuilder()
+	treeBuilder := builder.NewTreeBuilder()
 	tree := treeBuilder.
 		Name(hash).
 		ParentName(version.Name).

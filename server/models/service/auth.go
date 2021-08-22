@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"../../utils"
+	"../builder"
 	"../domain"
-	"../factory"
 	"../repository"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -47,8 +47,8 @@ func (auth *AuthService) Login(login, password string) map[string]interface{} {
 }
 
 func (auth *AuthService) Register(login, email, password string) map[string]interface{} {
-	builder := factory.NewAccountBuilder()
-	account := builder.
+	accountBuilder := builder.NewAccountBuilder()
+	account := accountBuilder.
 		Login(login).
 		Email(email).
 		Password(password).

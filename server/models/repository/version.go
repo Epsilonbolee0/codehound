@@ -33,6 +33,18 @@ func (repo *VersionRepository) UpdateCode(name, code string) error {
 	return repo.Conn.Model(&domain.Version{}).Where("name = ?", name).Update("code", code).Error
 }
 
+func (repo *VersionRepository) Delete(name string) error {
+	return repo.Conn.Where("name = ?", name).Delete(domain.Version{}).Error
+}
+
+func (repo *VersionRepository) LibraryIsValid(name string, library domain.Library) bool {
+	var impl domain.Implementation
+
+	subQuery := repo.Conn.Model(&domain.Version{}).Where("name = ?", name).Select("implementation")
+	err := repo.Conn.Where("name = (?) AND language_id = ?", subQuery, library.LanguageID).First(&impl).Error
+	return err == nil && impl.Name != ""
+}
+
 func (repo *VersionRepository) ListLibraries(name string) ([]domain.Library, error) {
 	var libraries []domain.Library
 	repo.Conn.Model(&domain.Version{Name: name}).Association("Libraries").Find(&libraries)
@@ -54,14 +66,23 @@ func (repo *VersionRepository) ClearLibraries(name string) error {
 	return nil
 }
 
-func (repo *VersionRepository) Delete(name string) error {
-	return repo.Conn.Where("name = ?", name).Delete(domain.Version{}).Error
+func (repo *VersionRepository) ListTags(name string) ([]domain.Tag, error) {
+	var tags []domain.Tag
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Tags").Find(&tags)
+	return tags, nil
 }
 
-func (repo *VersionRepository) LibraryIsValid(name string, library domain.Library) bool {
-	var impl domain.Implementation
+func (repo *VersionRepository) AddTag(name string, tag domain.Tag) error {
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Tags").Append(&tag)
+	return nil
+}
 
-	subQuery := repo.Conn.Model(&domain.Version{}).Where("name = ?", name).Select("implementation")
-	err := repo.Conn.Where("name = (?) AND language_id = ?", subQuery, library.LanguageID).First(&impl).Error
-	return err == nil && impl.Name != ""
+func (repo *VersionRepository) DeleteTag(name string, tag domain.Tag) error {
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Tags").Delete(&tag)
+	return nil
+}
+
+func (repo *VersionRepository) ClearTags(name string) error {
+	repo.Conn.Model(&domain.Version{Name: name}).Association("Tags").Clear()
+	return nil
 }

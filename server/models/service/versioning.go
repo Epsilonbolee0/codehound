@@ -19,6 +19,7 @@ type VersioningService struct {
 	implRepo    *repository.ImplementationRepository
 	libraryRepo *repository.LibraryRepository
 	treeRepo    *repository.TreeRepository
+	tagRepo     *repository.TagRepository
 }
 
 func NewVersioningService(
@@ -26,8 +27,9 @@ func NewVersioningService(
 	versionRepo *repository.VersionRepository,
 	implRepo *repository.ImplementationRepository,
 	libraryRepo *repository.LibraryRepository,
-	treeRepo *repository.TreeRepository) *VersioningService {
-	return &VersioningService{accountRepo, versionRepo, implRepo, libraryRepo, treeRepo}
+	treeRepo *repository.TreeRepository,
+	tagRepo *repository.TagRepository) *VersioningService {
+	return &VersioningService{accountRepo, versionRepo, implRepo, libraryRepo, treeRepo, tagRepo}
 }
 
 func (versioning *VersioningService) ListByAuthor(login string) map[string]interface{} {
@@ -209,6 +211,25 @@ func (versioning *VersioningService) UpdateCode(name, code string) map[string]in
 	return utils.Message(http.StatusOK, "Version code successfully updated!")
 }
 
+func (versioning *VersioningService) Delete(name string) map[string]interface{} {
+	err := versioning.versionRepo.ClearLibraries(name)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Error occured while deleting versions!")
+	}
+
+	err = versioning.versionRepo.ClearTags(name)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Error occured while deleting versions!")
+	}
+
+	err = versioning.versionRepo.Delete(name)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Error occured while deleting versions!")
+	}
+
+	return utils.Message(http.StatusOK, "Version successfully deleted!")
+}
+
 func (versioning *VersioningService) ListLibraries(name string) map[string]interface{} {
 	libraries, err := versioning.versionRepo.ListLibraries(name)
 	if err != nil {
@@ -263,16 +284,46 @@ func (versioning *VersioningService) DeleteLibrary(name, libName, libVersion str
 	return utils.Message(http.StatusOK, "Library deleted!")
 }
 
-func (versioning *VersioningService) Delete(name string) map[string]interface{} {
-	err := versioning.versionRepo.ClearLibraries(name)
+func (versioning *VersioningService) ListTags(name string) map[string]interface{} {
+	tags, err := versioning.versionRepo.ListTags(name)
 	if err != nil {
-		return utils.Message(http.StatusInternalServerError, "Error occured while deleting versions!")
+		return utils.Message(http.StatusInternalServerError, "Failure occured while listing tags!")
 	}
 
-	err = versioning.versionRepo.Delete(name)
+	response := utils.Message(http.StatusOK, "Tags listed!")
+	response["tags"] = tags
+	return response
+}
+
+func (versioning *VersioningService) AddTag(name, category, content string) map[string]interface{} {
+	tag, err := versioning.tagRepo.FindOrCreate(category, content)
 	if err != nil {
-		return utils.Message(http.StatusInternalServerError, "Error occured while deleting versions!")
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding tag!")
 	}
 
-	return utils.Message(http.StatusOK, "Version successfully deleted!")
+	err = versioning.versionRepo.AddTag(name, tag)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding tag!")
+	}
+
+	return utils.Message(http.StatusOK, "Tag added!")
+}
+
+func (versioning *VersioningService) DeleteTag(name, category, content string) map[string]interface{} {
+	tag, err := versioning.tagRepo.Find(category, content)
+	switch err {
+	case nil:
+		break
+	case gorm.ErrRecordNotFound:
+		return utils.Message(http.StatusNotFound, "No tag!")
+	default:
+		return utils.Message(http.StatusInternalServerError, "Failure occured while deleting tag!")
+	}
+
+	err = versioning.versionRepo.DeleteTag(name, tag)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while deleting tag!")
+	}
+
+	return utils.Message(http.StatusOK, "Tag deleted!")
 }

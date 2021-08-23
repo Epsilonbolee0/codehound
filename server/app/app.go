@@ -55,7 +55,8 @@ func setupVersioningController(conn *gorm.DB, router *mux.Router) {
 	libraryRepo := repository.NewLibraryRepository(conn)
 	implRepo := repository.NewImplementationRepository(conn)
 	treeRepo := repository.NewTreeRepository(conn)
-	versioningService := service.NewVersioningService(accountRepo, versionRepo, implRepo, libraryRepo, treeRepo)
+	tagRepo := repository.NewTagRepository(conn)
+	versioningService := service.NewVersioningService(accountRepo, versionRepo, implRepo, libraryRepo, treeRepo, tagRepo)
 	controllers.SetupVersioningController(versioningService, router)
 }
 

@@ -7,7 +7,8 @@ type Account struct {
 	Password string `json:"password"`
 	Role     string `json:"role"`
 
-	Versions []Version `json:"versions" gorm:"foreignKey:Author"`
+	Versions     []Version     `json:"versions" gorm:"foreignKey:Author"`
+	Descriptions []Description `json:"descriptions" gorm:"foreignKey:Author"`
 }
 
 type AccountDTO struct {

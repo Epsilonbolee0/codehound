@@ -9,6 +9,7 @@ type Version struct {
 
 	Author         uint      `json:"author"`
 	Implementation string    `json:"implementation"`
+	Tags           []Tag     `json:"versions" gorm:"many2many:version_tags"`
 	Libraries      []Library `json:"libraries" gorm:"many2many:version_libraries"`
 }
 
@@ -20,4 +21,6 @@ type VersionDTO struct {
 	Implementation string `json:"implementation"`
 	LibraryName    string `json:"library_name"`
 	LibraryVersion string `json:"library_version"`
+	Category       string `json:"category"`
+	Content        string `json:"content"`
 }

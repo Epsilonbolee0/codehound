@@ -21,15 +21,18 @@ func SetupVersioningController(versioningService *service.VersioningService, rou
 	router.HandleFunc("/versioning/update_code", controller.UpdateCode).Methods("PATCH")
 	router.HandleFunc("/versioning/delete", controller.Delete).Methods("DELETE")
 
-	router.HandleFunc("/versioning/list_libraries", controller.ListLibraries).Methods("GET")
-	router.HandleFunc("/versioning/add_library", controller.AddLibrary).Methods("PATCH")
-	router.HandleFunc("/versioning/delete_library", controller.DeleteLibrary).Methods("DELETE")
+	router.HandleFunc("/versioning/lib/list", controller.ListLibraries).Methods("GET")
+	router.HandleFunc("/versioning/lib/add", controller.AddLibrary).Methods("PATCH")
+	router.HandleFunc("/versioning/lib/delete", controller.DeleteLibrary).Methods("DELETE")
+
+	router.HandleFunc("/versioning/tag/list", controller.ListTags).Methods("GET")
+	router.HandleFunc("/versioning/tag/add", controller.AddTag).Methods("POST")
+	router.HandleFunc("/versioning/tag/delete", controller.DeleteTag).Methods("DELETE")
 
 	router.HandleFunc("/versioning/tree/bfs", controller.ListTreeBFS).Methods("GET")
 	router.HandleFunc("/versioning/tree/parent", controller.FindParent).Methods("GET")
 	router.HandleFunc("/versioning/tree/children", controller.ListChildren).Methods("GET")
 	router.HandleFunc("/versioning/tree/add", controller.AddChildVersion).Methods("POST")
-
 }
 
 func (controller *VersioningController) ListByAuthor(w http.ResponseWriter, r *http.Request) {
@@ -130,6 +133,20 @@ func (controller *VersioningController) UpdateCode(w http.ResponseWriter, r *htt
 	utils.Respond(w, resp)
 }
 
+func (controller *VersioningController) Delete(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.VersionDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.versioningService.Delete(dto.Name)
+	}
+
+	utils.Respond(w, resp)
+}
+
 func (controller *VersioningController) ListLibraries(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
 	dto := &domain.VersionDTO{}
@@ -172,7 +189,7 @@ func (controller *VersioningController) DeleteLibrary(w http.ResponseWriter, r *
 	utils.Respond(w, resp)
 }
 
-func (controller *VersioningController) Delete(w http.ResponseWriter, r *http.Request) {
+func (controller *VersioningController) ListTags(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
 	dto := &domain.VersionDTO{}
 
@@ -180,7 +197,35 @@ func (controller *VersioningController) Delete(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.versioningService.Delete(dto.Name)
+		resp = controller.versioningService.ListTags(dto.Name)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *VersioningController) AddTag(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.VersionDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.versioningService.AddTag(dto.Name, dto.Category, dto.Content)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *VersioningController) DeleteTag(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.VersionDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.versioningService.DeleteTag(dto.Name, dto.Category, dto.Content)
 	}
 
 	utils.Respond(w, resp)

@@ -1,9 +1,10 @@
 package domain
 
 type Implementation struct {
-	Name       string    `json:"name" gorm:"primaryKey"`
-	LanguageID uint      `json:"language"`
-	Versions   []Version `json:"versions" gorm:"foreignKey:Implementation"`
+	Name        string        `json:"name" gorm:"primaryKey"`
+	LanguageID  uint          `json:"language"`
+	Versions    []Version     `json:"versions" gorm:"foreignKey:Implementation"`
+	Description []Description `json:"description" gorm:"foreignKey:Implementation"`
 }
 
 type ImplementationDTO struct {

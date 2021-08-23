@@ -61,8 +61,10 @@ func setupVersioningController(conn *gorm.DB, router *mux.Router) {
 }
 
 func setupFunctionsController(conn *gorm.DB, router *mux.Router) {
-	languageRepo := repository.NewLanguageRepository(conn)
+	accountRepo := repository.NewAccountRepository(conn)
 	implRepo := repository.NewImplementationRepository(conn)
-	functionService := service.NewFunctionService(implRepo, languageRepo)
+	languageRepo := repository.NewLanguageRepository(conn)
+	descriptionRepo := repository.NewDescriptionRepository(conn)
+	functionService := service.NewFunctionService(accountRepo, implRepo, languageRepo, descriptionRepo)
 	controllers.SetupFunctionController(functionService, router)
 }

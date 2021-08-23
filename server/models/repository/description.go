@@ -25,7 +25,7 @@ func (repo *DescriptionRepository) ListByImplementation(impl string) ([]domain.D
 	return descriptions, err
 }
 
-func (repo *DescriptionRepository) Create(description *domain.Description) error {
+func (repo *DescriptionRepository) Create(description domain.Description) error {
 	return repo.Conn.Create(&description).Error
 }
 

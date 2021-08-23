@@ -13,18 +13,6 @@ func NewTagRepository(conn *gorm.DB) *TagRepository {
 	return &TagRepository{Conn: conn}
 }
 
-func (repo *TagRepository) List() ([]domain.Tag, error) {
-	var tags []domain.Tag
-	err := repo.Conn.Find(&tags).Error
-	return tags, err
-}
-
-func (repo *TagRepository) ListByCategory(category string) ([]string, error) {
-	var content []string
-	err := repo.Conn.Where("category = ?", category).Pluck("content", &content).Error
-	return content, err
-}
-
 func (repo *TagRepository) FindOrCreate(category, content string) (domain.Tag, error) {
 	var tag domain.Tag
 	err := repo.Conn.FirstOrCreate(&tag, domain.Tag{Category: category, Content: content}).Error

@@ -58,6 +58,7 @@ func GetConnection(role string) *gorm.DB {
 		&domain.Implementation{},
 		&domain.Tag{},
 		&domain.Description{},
+		&domain.Test{},
 	)
 	return conn
 }

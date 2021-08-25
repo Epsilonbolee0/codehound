@@ -14,13 +14,15 @@ type FunctionService struct {
 	implementationRepo *repository.ImplementationRepository
 	languageRepo       *repository.LanguageRepository
 	descriptionRepo    *repository.DescriptionRepository
+	testRepo           *repository.TestRepository
 }
 
 func NewFunctionService(accountRepo *repository.AccountRepository,
 	implementationRepo *repository.ImplementationRepository,
 	langRepo *repository.LanguageRepository,
-	descriptionRepo *repository.DescriptionRepository) *FunctionService {
-	return &FunctionService{accountRepo, implementationRepo, langRepo, descriptionRepo}
+	descriptionRepo *repository.DescriptionRepository,
+	testRepo *repository.TestRepository) *FunctionService {
+	return &FunctionService{accountRepo, implementationRepo, langRepo, descriptionRepo, testRepo}
 }
 
 func (function *FunctionService) List() map[string]interface{} {
@@ -117,10 +119,10 @@ func (function *FunctionService) AddDescription(login, impl, content string) map
 
 	err = function.descriptionRepo.Create(description)
 	if err != nil {
-		return utils.Message(http.StatusInternalServerError, "Failure occured while adding tag!")
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding description!")
 	}
 
-	return utils.Message(http.StatusOK, "Tag added!")
+	return utils.Message(http.StatusOK, "Description added!")
 }
 
 func (function *FunctionService) UpdateDescription(id uint, content string) map[string]interface{} {
@@ -215,4 +217,89 @@ func (function *FunctionService) DeleteOutArgument(name string, index uint) map[
 	}
 
 	return utils.Message(http.StatusOK, "Out argument deleted!")
+}
+
+func (function *FunctionService) ListTests(impl string) map[string]interface{} {
+	tests, err := function.testRepo.List(impl)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while listing tests!")
+	}
+
+	response := utils.Message(http.StatusOK, "Tests listed!")
+	response["tests"] = tests
+	return response
+}
+
+func (function *FunctionService) AddTest(login, impl, description string) map[string]interface{} {
+	author, err := function.accountRepo.FindByLogin(login)
+	switch err {
+	case nil:
+		break
+	case gorm.ErrRecordNotFound:
+		return utils.Message(http.StatusNotFound, "Author not found")
+	default:
+		return utils.Message(http.StatusInternalServerError, "Error occured while adding test")
+	}
+
+	inCount, err := function.implementationRepo.CountArguments("in_args", impl)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding test!")
+	}
+
+	outCount, err := function.implementationRepo.CountArguments("out_args", impl)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding test!")
+	}
+
+	testBuilder := builder.NewTestBuilder()
+	test := testBuilder.
+		Author(author.ID).
+		Implementation(impl).
+		InArgs(inCount).
+		OutArgs(outCount).
+		Description(description).
+		Build()
+
+	err = function.testRepo.Create(test)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding test!")
+	}
+
+	return utils.Message(http.StatusOK, "Test added!")
+}
+
+func (function *FunctionService) UpdateDescriptionForTest(id uint, description string) map[string]interface{} {
+	err := function.testRepo.UpdateDescription(id, description)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while updating test description!")
+	}
+
+	return utils.Message(http.StatusOK, "Test description updated")
+}
+
+func (function *FunctionService) UpdateInArgumentForTest(id, index uint, value string) map[string]interface{} {
+	err := function.testRepo.UpdateArgument("in_args", id, index, value)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while updating test in argument!")
+	}
+
+	return utils.Message(http.StatusOK, "Test in argument updated")
+}
+
+func (function *FunctionService) UpdateOutArgumentForTest(id, index uint, value string) map[string]interface{} {
+	err := function.testRepo.UpdateArgument("out_args", id, index, value)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while updating test out argument!")
+	}
+
+	return utils.Message(http.StatusOK, "Test out argument updated")
+}
+
+func (function *FunctionService) DeleteTest(id uint) map[string]interface{} {
+	err := function.testRepo.Delete(id)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while deleting test!")
+	}
+
+	return utils.Message(http.StatusOK, "Test deleted")
 }

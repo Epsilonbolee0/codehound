@@ -99,3 +99,15 @@ func (repo *ImplementationRepository) RemoveArgument(field, name string, index u
 
 	return repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Update(field, pq.StringArray(args)).Error
 }
+
+func (repo *ImplementationRepository) CountArguments(field, name string) (uint, error) {
+	var args []string
+
+	row := repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Select(field).Row()
+	err := row.Scan(pq.Array(&args))
+	if err != nil {
+		return 0, err
+	}
+
+	return uint(len(args)), nil
+}

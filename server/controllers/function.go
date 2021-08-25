@@ -35,6 +35,13 @@ func SetupFunctionController(functionService *service.FunctionService, router *m
 	router.HandleFunc("/func/out/add", controller.AddOutArgument).Methods("PATCH")
 	router.HandleFunc("/func/out/update", controller.UpdateOutArgument).Methods("PATCH")
 	router.HandleFunc("/func/out/delete", controller.DeleteOutArgument).Methods("PATCH")
+
+	router.HandleFunc("/func/test/list", controller.ListTests).Methods("GET")
+	router.HandleFunc("/func/test/add", controller.AddTest).Methods("POST")
+	router.HandleFunc("/func/test/update", controller.UpdateDescriptionForTest).Methods("PATCH")
+	router.HandleFunc("/func/test/in/update", controller.UpdateInArgumentForTest).Methods("PATCH")
+	router.HandleFunc("/func/test/out/update", controller.UpdateOutArgumentForTest).Methods("PATCH")
+	router.HandleFunc("/func/test/delete", controller.DeleteTest).Methods("DELETE")
 }
 
 func (controller *FunctionController) Add(w http.ResponseWriter, r *http.Request) {
@@ -261,6 +268,96 @@ func (controller *FunctionController) DeleteOutArgument(w http.ResponseWriter, r
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
 		resp = controller.functionService.DeleteOutArgument(dto.Name, dto.Index)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) ListTests(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.TestDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.ListTests(dto.Implementation)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) AddTest(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.TestDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.AddTest(dto.Login, dto.Implementation, dto.Description)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) UpdateDescriptionForTest(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.TestDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.UpdateDescriptionForTest(dto.ID, dto.Description)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) UpdateInArgumentForTest(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.TestDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.UpdateInArgumentForTest(dto.ID, dto.Index, dto.Value)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) UpdateOutArgumentForTest(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.TestDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.UpdateOutArgumentForTest(dto.ID, dto.Index, dto.Value)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) DeleteTest(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.TestDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.DeleteTest(dto.ID)
 	}
 
 	utils.Respond(w, resp)

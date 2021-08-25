@@ -65,6 +65,7 @@ func setupFunctionsController(conn *gorm.DB, router *mux.Router) {
 	implRepo := repository.NewImplementationRepository(conn)
 	languageRepo := repository.NewLanguageRepository(conn)
 	descriptionRepo := repository.NewDescriptionRepository(conn)
-	functionService := service.NewFunctionService(accountRepo, implRepo, languageRepo, descriptionRepo)
+	testRepo := repository.NewTestRepository(conn)
+	functionService := service.NewFunctionService(accountRepo, implRepo, languageRepo, descriptionRepo, testRepo)
 	controllers.SetupFunctionController(functionService, router)
 }

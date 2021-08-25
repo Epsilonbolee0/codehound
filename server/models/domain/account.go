@@ -9,6 +9,7 @@ type Account struct {
 
 	Versions     []Version     `json:"versions" gorm:"foreignKey:Author"`
 	Descriptions []Description `json:"descriptions" gorm:"foreignKey:Author"`
+	Tests        []Test        `json:"tests" gorm:"foreignKey:Author"`
 }
 
 type AccountDTO struct {

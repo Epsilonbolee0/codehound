@@ -4,7 +4,7 @@ type Description struct {
 	ID             uint   `json:"id" gorm:"primaryKey"`
 	Content        string `json:"content" gorm:"unique"`
 	Author         uint   `json:"author"`
-	Implementation string `json:"version"`
+	Implementation string `json:"implementation"`
 }
 
 type DescriptionDTO struct {

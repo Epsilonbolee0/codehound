@@ -140,3 +140,79 @@ func (function *FunctionService) DeleteDescription(id uint) map[string]interface
 
 	return utils.Message(http.StatusOK, "Description deleted!")
 }
+
+func (function *FunctionService) ListInArguments(name string) map[string]interface{} {
+	inArgs, err := function.implementationRepo.GetArguments("in_args", name)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while listing in arguments!")
+	}
+
+	response := utils.Message(http.StatusOK, "In arguments listed!")
+	response["in_args"] = inArgs
+	return response
+}
+
+func (function *FunctionService) ListOutArguments(name string) map[string]interface{} {
+	outArgs, err := function.implementationRepo.GetArguments("out_args", name)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while listing out arguments!")
+	}
+
+	response := utils.Message(http.StatusOK, "Out arguments listed!")
+	response["out_args"] = outArgs
+	return response
+}
+
+func (function *FunctionService) AddInArgument(name, value string) map[string]interface{} {
+	err := function.implementationRepo.AddArgument("in_args", name, value)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding in argument!")
+	}
+
+	return utils.Message(http.StatusOK, "In argument added!")
+}
+
+func (function *FunctionService) AddOutArgument(name, value string) map[string]interface{} {
+	err := function.implementationRepo.AddArgument("out_args", name, value)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while adding out argument!")
+	}
+
+	return utils.Message(http.StatusOK, "Out argument added!")
+}
+
+func (function *FunctionService) UpdateInArgument(name string, index uint, value string) map[string]interface{} {
+	err := function.implementationRepo.UpdateArgument("in_args", name, index, value)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while updating in argument!")
+	}
+
+	return utils.Message(http.StatusOK, "In argument updated!")
+}
+
+func (function *FunctionService) UpdateOutArgument(name string, index uint, value string) map[string]interface{} {
+	err := function.implementationRepo.UpdateArgument("out_args", name, index, value)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while updating out argument!")
+	}
+
+	return utils.Message(http.StatusOK, "Out argument updated!")
+}
+
+func (function *FunctionService) DeleteInArgument(name string, index uint) map[string]interface{} {
+	err := function.implementationRepo.RemoveArgument("in_args", name, index)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while deleting in argument!")
+	}
+
+	return utils.Message(http.StatusOK, "In argument deleted!")
+}
+
+func (function *FunctionService) DeleteOutArgument(name string, index uint) map[string]interface{} {
+	err := function.implementationRepo.RemoveArgument("out_args", name, index)
+	if err != nil {
+		return utils.Message(http.StatusInternalServerError, "Failure occured while deleting out argument!")
+	}
+
+	return utils.Message(http.StatusOK, "Out argument deleted!")
+}

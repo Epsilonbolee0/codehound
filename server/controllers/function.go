@@ -25,6 +25,16 @@ func SetupFunctionController(functionService *service.FunctionService, router *m
 	router.HandleFunc("/func/descr/list", controller.ListDescriptions).Methods("GET")
 	router.HandleFunc("/func/descr/update", controller.UpdateDescription).Methods("PATCH")
 	router.HandleFunc("/func/descr/delete", controller.DeleteDescription).Methods("DELETE")
+
+	router.HandleFunc("/func/in/list", controller.ListInArguments).Methods("GET")
+	router.HandleFunc("/func/in/add", controller.AddInArgument).Methods("PATCH")
+	router.HandleFunc("/func/in/update", controller.UpdateInArgument).Methods("PATCH")
+	router.HandleFunc("/func/in/delete", controller.DeleteInArgument).Methods("PATCH")
+
+	router.HandleFunc("/func/out/list", controller.ListOutArguments).Methods("GET")
+	router.HandleFunc("/func/out/add", controller.AddOutArgument).Methods("PATCH")
+	router.HandleFunc("/func/out/update", controller.UpdateOutArgument).Methods("PATCH")
+	router.HandleFunc("/func/out/delete", controller.DeleteOutArgument).Methods("PATCH")
 }
 
 func (controller *FunctionController) Add(w http.ResponseWriter, r *http.Request) {
@@ -131,6 +141,126 @@ func (controller *FunctionController) DeleteDescription(w http.ResponseWriter, r
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
 		resp = controller.functionService.DeleteDescription(dto.ID)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) ListInArguments(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.ListInArguments(dto.Name)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) ListOutArguments(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.ListOutArguments(dto.Name)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) AddInArgument(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.AddInArgument(dto.Name, dto.Value)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) AddOutArgument(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.AddOutArgument(dto.Name, dto.Value)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) UpdateInArgument(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.UpdateInArgument(dto.Name, dto.Index, dto.Value)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) UpdateOutArgument(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.UpdateOutArgument(dto.Name, dto.Index, dto.Value)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) DeleteInArgument(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.DeleteInArgument(dto.Name, dto.Index)
+	}
+
+	utils.Respond(w, resp)
+}
+
+func (controller *FunctionController) DeleteOutArgument(w http.ResponseWriter, r *http.Request) {
+	var resp map[string]interface{}
+	dto := &domain.ImplementationDTO{}
+
+	err := json.NewDecoder(r.Body).Decode(dto)
+
+	if err != nil {
+		resp = utils.Message(http.StatusBadRequest, "Invalid request")
+	} else {
+		resp = controller.functionService.DeleteOutArgument(dto.Name, dto.Index)
 	}
 
 	utils.Respond(w, resp)

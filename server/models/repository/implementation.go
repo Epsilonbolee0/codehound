@@ -1,7 +1,10 @@
 package repository
 
 import (
+	"fmt"
+
 	"../domain"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -36,4 +39,63 @@ func (repo *ImplementationRepository) FindRoot(name string) (domain.Version, err
 
 func (repo *ImplementationRepository) Create(impl domain.Implementation) error {
 	return repo.Conn.Create(&impl).Error
+}
+
+func (repo *ImplementationRepository) GetArguments(field, name string) ([]string, error) {
+	var args []string
+	row := repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Select(field).Row()
+
+	err := row.Scan(pq.Array(&args))
+	return args, err
+}
+
+func (repo *ImplementationRepository) AddArgument(field, name, value string) error {
+	var args []string
+
+	row := repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Select(field).Row()
+	err := row.Scan(pq.Array(&args))
+	if err != nil {
+		return err
+	}
+
+	args = append(args, value)
+	return repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Update(field, pq.StringArray(args)).Error
+}
+
+func (repo *ImplementationRepository) UpdateArgument(field, name string, index uint, value string) error {
+	var args []string
+
+	row := repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Select(field).Row()
+	err := row.Scan(pq.Array(&args))
+	if err != nil {
+		return err
+	}
+
+	if index >= uint(len(args)) {
+		return fmt.Errorf("index is out of bounds")
+	}
+
+	args[index] = value
+
+	return repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Update(field, pq.StringArray(args)).Error
+}
+
+func (repo *ImplementationRepository) RemoveArgument(field, name string, index uint) error {
+	var args []string
+
+	row := repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Select(field).Row()
+	err := row.Scan(pq.Array(&args))
+	if err != nil {
+		return err
+	}
+
+	if index >= uint(len(args)) {
+		return fmt.Errorf("index is out of bounds")
+	}
+
+	copy(args[index:], args[index+1:])
+	args[len(args)-1] = ""
+	args = args[:len(args)-1]
+
+	return repo.Conn.Model(&domain.Implementation{}).Where("name = ?", name).Update(field, pq.StringArray(args)).Error
 }

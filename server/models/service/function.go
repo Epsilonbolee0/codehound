@@ -64,7 +64,7 @@ func (function *FunctionService) FindRoot(name string) map[string]interface{} {
 }
 
 func (function *FunctionService) Create(name, langName, langVersion string) map[string]interface{} {
-	language, err := function.languageRepo.FindByNameAndVersion(langName, langVersion)
+	language, err := function.languageRepo.Find(langName, langVersion)
 	switch err {
 	case nil:
 		break

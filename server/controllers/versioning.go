@@ -17,7 +17,6 @@ type VersioningController struct {
 func SetupVersioningController(versioningService *service.VersioningService, router *mux.Router) {
 	controller := &VersioningController{versioningService: versioningService}
 	router.HandleFunc("/versioning/add", controller.AddVersion).Methods("POST")
-	router.HandleFunc("/versioning/list", controller.ListByAuthor).Methods("GET")
 	router.HandleFunc("/versioning/update_code", controller.UpdateCode).Methods("PATCH")
 	router.HandleFunc("/versioning/delete", controller.Delete).Methods("DELETE")
 
@@ -35,29 +34,22 @@ func SetupVersioningController(versioningService *service.VersioningService, rou
 	router.HandleFunc("/versioning/tree/add", controller.AddChildVersion).Methods("POST")
 }
 
-func (controller *VersioningController) ListByAuthor(w http.ResponseWriter, r *http.Request) {
-	var resp map[string]interface{}
-	dto := &domain.VersionDTO{}
-
-	err := json.NewDecoder(r.Body).Decode(dto)
-	if err != nil {
-		resp = utils.Message(http.StatusBadRequest, "Invalid request")
-	} else {
-		resp = controller.versioningService.ListByAuthor(dto.Login)
-	}
-
-	utils.Respond(w, resp)
-}
-
 func (controller *VersioningController) AddVersion(w http.ResponseWriter, r *http.Request) {
 	var resp map[string]interface{}
 	dto := &domain.VersionDTO{}
 
-	err := json.NewDecoder(r.Body).Decode(dto)
+	login, err := utils.LoginFromCookie(r)
+	if err != nil {
+		resp = utils.Message(http.StatusUnauthorized, "Cookie not found!")
+		utils.Respond(w, resp)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(dto)
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.versioningService.AddVersion(dto.Code, dto.Login, dto.Implementation)
+		resp = controller.versioningService.AddVersion(dto.Code, login, dto.Implementation)
 	}
 
 	utils.Respond(w, resp)
@@ -67,11 +59,18 @@ func (controller *VersioningController) AddChildVersion(w http.ResponseWriter, r
 	var resp map[string]interface{}
 	dto := &domain.VersionDTO{}
 
-	err := json.NewDecoder(r.Body).Decode(dto)
+	login, err := utils.LoginFromCookie(r)
+	if err != nil {
+		resp = utils.Message(http.StatusUnauthorized, "Cookie not found!")
+		utils.Respond(w, resp)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(dto)
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.versioningService.AddChildVersion(dto.Login, dto.Name, dto.Link)
+		resp = controller.versioningService.AddChildVersion(login, dto.Name, dto.Link)
 	}
 
 	utils.Respond(w, resp)

@@ -36,7 +36,7 @@ func (tools *ToolsService) AddLanguage(name, version string) map[string]interfac
 }
 
 func (tools *ToolsService) AddLibrary(name, version, langName, langVersion string) map[string]interface{} {
-	language, err := tools.languageRepo.FindByNameAndVersion(langName, langVersion)
+	language, err := tools.languageRepo.Find(langName, langVersion)
 	switch err {
 	case nil:
 		break
@@ -118,7 +118,7 @@ func (tools *ToolsService) ListLibraryVersions(name string) map[string]interface
 }
 
 func (tools *ToolsService) DeleteLanguageVersion(name, version string) map[string]interface{} {
-	err := tools.languageRepo.DeleteByNameAndVersion(name, version)
+	err := tools.languageRepo.Delete(name, version)
 	if err != nil {
 		return utils.Message(http.StatusInternalServerError, "Failure occured while deleting language version!")
 	}
@@ -127,7 +127,7 @@ func (tools *ToolsService) DeleteLanguageVersion(name, version string) map[strin
 }
 
 func (tools *ToolsService) DeleteLibraryVersion(name, version string) map[string]interface{} {
-	err := tools.libraryRepo.DeleteByNameAndVersion(name, version)
+	err := tools.libraryRepo.Delete(name, version)
 	if err != nil {
 		return utils.Message(http.StatusInternalServerError, "Failure occured while deleting library version!")
 	}

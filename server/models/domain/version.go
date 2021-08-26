@@ -16,7 +16,6 @@ type Version struct {
 type VersionDTO struct {
 	Name           string `json:"name"`
 	Code           string `json:"code"`
-	Login          string `json:"login"`
 	Link           string `json:"link"`
 	Implementation string `json:"implementation"`
 	LibraryName    string `json:"library_name"`

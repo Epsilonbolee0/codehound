@@ -112,12 +112,19 @@ func (controller *FunctionController) AddDescription(w http.ResponseWriter, r *h
 	var resp map[string]interface{}
 	dto := &domain.DescriptionDTO{}
 
-	err := json.NewDecoder(r.Body).Decode(dto)
+	login, err := utils.LoginFromCookie(r)
+	if err != nil {
+		resp = utils.Message(http.StatusUnauthorized, "Cookie not found!")
+		utils.Respond(w, resp)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.functionService.AddDescription(dto.Login, dto.Implementation, dto.Content)
+		resp = controller.functionService.AddDescription(login, dto.Implementation, dto.Content)
 	}
 
 	utils.Respond(w, resp)
@@ -292,12 +299,19 @@ func (controller *FunctionController) AddTest(w http.ResponseWriter, r *http.Req
 	var resp map[string]interface{}
 	dto := &domain.TestDTO{}
 
-	err := json.NewDecoder(r.Body).Decode(dto)
+	login, err := utils.LoginFromCookie(r)
+	if err != nil {
+		resp = utils.Message(http.StatusUnauthorized, "Cookie not found!")
+		utils.Respond(w, resp)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(dto)
 
 	if err != nil {
 		resp = utils.Message(http.StatusBadRequest, "Invalid request")
 	} else {
-		resp = controller.functionService.AddTest(dto.Login, dto.Implementation, dto.Description)
+		resp = controller.functionService.AddTest(login, dto.Implementation, dto.Description)
 	}
 
 	utils.Respond(w, resp)

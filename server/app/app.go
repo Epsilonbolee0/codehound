@@ -23,6 +23,7 @@ func Run() {
 	setupToolsController(connections.GetConnection("admin"), router)
 	setupVersioningController(connections.GetConnection("admin"), router)
 	setupFunctionsController(connections.GetConnection("admin"), router)
+	setupProfileController(connections.GetConnection("admin"), router)
 
 	host := os.Getenv("server_host")
 	port := os.Getenv("server_port")
@@ -68,4 +69,13 @@ func setupFunctionsController(conn *gorm.DB, router *mux.Router) {
 	testRepo := repository.NewTestRepository(conn)
 	functionService := service.NewFunctionService(accountRepo, implRepo, languageRepo, descriptionRepo, testRepo)
 	controllers.SetupFunctionController(functionService, router)
+}
+
+func setupProfileController(conn *gorm.DB, router *mux.Router) {
+	accountRepo := repository.NewAccountRepository(conn)
+	versionRepo := repository.NewVersionRepository(conn)
+	descriptionRepo := repository.NewDescriptionRepository(conn)
+	testRepo := repository.NewTestRepository(conn)
+	profileService := service.NewProfileService(accountRepo, testRepo, versionRepo, descriptionRepo)
+	controllers.SetupProfileController(profileService, router)
 }

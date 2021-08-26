@@ -2,12 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"os"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 
 	"../token"
@@ -26,7 +23,6 @@ func SetupAuthController(authService *service.AuthService, router *mux.Router) {
 	router.HandleFunc("/auth/login", controller.Login).Methods("POST")
 	router.HandleFunc("/auth/logout", controller.Logout).Methods("POST")
 	router.HandleFunc("/auth/register", controller.Register).Methods("POST")
-	router.HandleFunc("/auth/home", controller.Home).Methods("GET")
 }
 
 func (controller *AuthController) Login(w http.ResponseWriter, r *http.Request) {
@@ -77,16 +73,4 @@ func (controller *AuthController) Register(w http.ResponseWriter, r *http.Reques
 		resp := controller.authService.Register(dto.Login, dto.Email, dto.Password)
 		utils.Respond(w, resp)
 	}
-}
-
-func (controller *AuthController) Home(w http.ResponseWriter, r *http.Request) {
-	c, _ := r.Cookie("token")
-	claims := &token.Claims{}
-	tokenString := c.Value
-
-	jwt.ParseWithClaims(tokenString, claims, func(tk *jwt.Token) (interface{}, error) {
-		return os.Getenv("token_password"), nil
-	})
-
-	w.Write([]byte(fmt.Sprintf("Welcome, %s!", claims.Login)))
 }

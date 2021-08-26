@@ -9,7 +9,6 @@ type Description struct {
 
 type DescriptionDTO struct {
 	ID             uint   `json:"id"`
-	Login          string `json:"login"`
 	Implementation string `json:"implementation"`
 	Content        string `json:"content"`
 }

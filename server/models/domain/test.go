@@ -14,7 +14,6 @@ type Test struct {
 
 type TestDTO struct {
 	ID             uint   `json:"id"`
-	Login          string `json:"login"`
 	Description    string `json:"description"`
 	Implementation string `json:"implementation"`
 	Author         uint   `json:"author"`

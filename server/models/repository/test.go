@@ -22,6 +22,12 @@ func (repo *TestRepository) List(impl string) ([]domain.Test, error) {
 	return tests, err
 }
 
+func (repo *TestRepository) ListByAuthor(author uint) ([]domain.Test, error) {
+	var tests []domain.Test
+	err := repo.Conn.Where("author = ?", author).Find(&tests).Error
+	return tests, err
+}
+
 func (repo *TestRepository) Create(test domain.Test) error {
 	return repo.Conn.Create(&test).Error
 }

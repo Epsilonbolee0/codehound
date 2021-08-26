@@ -32,32 +32,6 @@ func NewVersioningService(
 	return &VersioningService{accountRepo, versionRepo, implRepo, libraryRepo, treeRepo, tagRepo}
 }
 
-func (versioning *VersioningService) ListByAuthor(login string) map[string]interface{} {
-	author, err := versioning.accountRepo.FindByLogin(login)
-	switch err {
-	case nil:
-		break
-	case gorm.ErrRecordNotFound:
-		return utils.Message(http.StatusNotFound, "No author!")
-	default:
-		return utils.Message(http.StatusInternalServerError, "Error occured while listing versions")
-	}
-
-	versions, err := versioning.versionRepo.ListByAuthor(author)
-	switch err {
-	case nil:
-		break
-	case gorm.ErrRecordNotFound:
-		return utils.Message(http.StatusNotFound, "No version!")
-	default:
-		return utils.Message(http.StatusInternalServerError, "Error occured while listing versions")
-	}
-
-	response := utils.Message(http.StatusOK, "Versions listed!")
-	response["versions"] = versions
-	return response
-}
-
 func (versioning *VersioningService) AddVersion(code, login, implName string) map[string]interface{} {
 	author, err := versioning.accountRepo.FindByLogin(login)
 	switch err {

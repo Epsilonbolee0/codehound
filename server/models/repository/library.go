@@ -37,6 +37,6 @@ func (repo *LibraryRepository) Create(library domain.Library) error {
 	return repo.Conn.Create(&library).Error
 }
 
-func (repo *LibraryRepository) DeleteByNameAndVersion(name, version string) error {
+func (repo *LibraryRepository) Delete(name, version string) error {
 	return repo.Conn.Where("name = ? AND version = ?", name, version).Delete(domain.Library{}).Error
 }

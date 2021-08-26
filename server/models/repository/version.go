@@ -13,9 +13,9 @@ func NewVersionRepository(conn *gorm.DB) *VersionRepository {
 	return &VersionRepository{Conn: conn}
 }
 
-func (repo *VersionRepository) ListByAuthor(author domain.Account) ([]domain.Version, error) {
+func (repo *VersionRepository) ListByAuthor(author uint) ([]domain.Version, error) {
 	var versions []domain.Version
-	err := repo.Conn.Where("author = ?", author.ID).Find(&versions).Error
+	err := repo.Conn.Where("author = ?", author).Find(&versions).Error
 	return versions, err
 }
 
